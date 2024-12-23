@@ -30,11 +30,9 @@ Install `psql`:
 brew install libpq
 ```
 
-Create and configure `psql`:
+Create and configure `~/.psqlrc`:
 
 ```bash
-vi ~/.psqlrc
-
 \x auto
 \pset pager off
 \set PROMPT1 '%m %n@%/%R%#%x '
@@ -43,7 +41,7 @@ vi ~/.psqlrc
 \timing
 ```
 
-Add tools to your path and helper aliases:
+Add tools to your path and helper aliases in `~/.zshrc` or `~/.bashrc`:
 
 ```bash
 # Platform Storage Tools
@@ -98,8 +96,6 @@ positional arguments:
 options:
   -h, --help   show this help message and exit
 
-pg [-h] [environment] [cluster] [role]
-
 # List all available stages
 pg
 
@@ -114,6 +110,13 @@ pg dev fbg-dev-1 fbg-dev-1-postgresql
 
 # Connect to fbg-dev-1-postgresql as the postgres user
 pg dev fbg-dev-1 fbg-dev-1-postgresql postgres
+
+# If you added the aliases during installation you can quickly connect to parents by running
+pgdev
+pginfdev
+pgtest
+pgcert
+pgprod
 ```
 
 ### pghosts
@@ -121,8 +124,8 @@ pg dev fbg-dev-1 fbg-dev-1-postgresql postgres
 Print Postgres endpoints and ports (from `~/.pgpass`) matching a search term:
 
 ```bash
-# List all hostnames matching dev
-pghosts dev
+# List all hostnames matching inf-dev
+pghosts inf-dev
 ```
 
 ### pg_repack

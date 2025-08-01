@@ -6,9 +6,6 @@ BEGIN;
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE rgs_game_rounds_fix (LIKE rgs_game_rounds_archive INCLUDING ALL);
 
--- Populate archive table to keep for backup
-INSERT INTO rgs_game_rounds_archive SELECT * FROM rgs_game_rounds;
-
 -- Drop foreign keys on archive table
 -- None
 
@@ -23,7 +20,7 @@ ALTER TABLE rgs_game_rounds_archive DROP CONSTRAINT rgs_game_rounds_archive_ext_
 ALTER TABLE rgs_game_rounds_archive RENAME TO rgs_game_rounds_archive_old;
 
 -- Populate fix table
-INSERT INTO rgs_game_rounds_fix SELECT * FROM rgs_game_rounds_archive_old;
+INSERT INTO rgs_game_rounds_fix SELECT * FROM rgs_game_rounds;
 
 -- Drop partitioned table, drops all partitions, safe because all data is in archive
 DROP TABLE rgs_game_rounds;

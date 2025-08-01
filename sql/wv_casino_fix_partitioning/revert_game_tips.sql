@@ -6,9 +6,6 @@ BEGIN;
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE game_tips_fix (LIKE game_tips_archive INCLUDING ALL);
 
--- Populate archive table to keep for backup
-INSERT INTO game_tips_archive SELECT * FROM game_tips;
-
 -- Drop foreign keys on archive table
 -- None
 
@@ -22,7 +19,7 @@ DROP INDEX game_tips_archive_ext_transaction_id_idx;
 ALTER TABLE game_tips_archive RENAME TO game_tips_archive_old;
 
 -- Populate fix table
-INSERT INTO game_tips_fix SELECT * FROM game_tips_archive_old;
+INSERT INTO game_tips_fix SELECT * FROM game_tips;
 
 -- Drop partitioned table, drops all partitions, safe because all data is in archive
 DROP TABLE game_tips;

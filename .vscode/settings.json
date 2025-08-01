@@ -1,6 +1,0 @@
-{
-    "python.defaultInterpreterPath": "~/.pst/bin/python",
-    "python.analysis.extraPaths": [
-        "~/.pst/lib/python3.12/site-packages"
-    ]
-}

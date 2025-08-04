@@ -7,7 +7,7 @@
 BEGIN;
 -- Backout old partman configs
 DELETE FROM partman.part_config WHERE parent_table = 'public.rgs_game_rounds';
-DROP TABLE partman.rgs_game_rounds_template;
+DROP TABLE IF EXISTS partman.rgs_game_rounds_template;
 
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE rgs_game_rounds_fix (LIKE rgs_game_rounds_archive INCLUDING ALL);

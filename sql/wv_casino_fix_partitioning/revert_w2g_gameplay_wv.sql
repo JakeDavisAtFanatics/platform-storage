@@ -65,6 +65,30 @@ Check constraints:
     "w2g_gameplay_archive_tax_status_check" CHECK (tax_status::text = ANY (ARRAY['DEDUCTED'::character varying, 'REFUNDED'::character varying]::text[]))
 
 
+-- Current target table prod mi
+fbg-prod-1mi-postgresql postgres@bet_fanatics=> \d w2g_gameplay
+                                     Table "public.w2g_gameplay"
+       Column       |           Type           | Collation | Nullable |            Default            
+--------------------+--------------------------+-----------+----------+-------------------------------
+ id                 | bigint                   |           | not null | 
+ game_play_id       | bigint                   |           |          | 
+ result_type        | character varying(5)     |           |          | 'TYPE1'::character varying
+ total_payout       | numeric(14,4)            |           | not null | 
+ total_stake        | numeric(14,4)            |           | not null | 
+ total_winnings     | numeric(14,4)            |           | not null | 
+ settlement_time    | timestamp with time zone |           | not null | now()
+ tax_federal        | numeric(14,4)            |           |          | 
+ tax_state          | numeric(14,4)            |           |          | 
+ tax_on_returns_amt | numeric(14,4)            |           |          | 
+ tax_status         | character varying(10)    |           |          | 'DEDUCTED'::character varying
+ jurisdiction_code  | character varying        |           |          | 
+Indexes:
+    "w2g_gameplay_pkey" PRIMARY KEY, btree (id)
+Check constraints:
+    "check_tax_status" CHECK (tax_status::text = ANY (ARRAY['DEDUCTED'::character varying::text, 'REFUNDED'::character varying::text]))
+Publications:
+    "pub_fbg_prod_1mi_to_fbg_prod_1"
+
 -- Check for copy tables
 
 

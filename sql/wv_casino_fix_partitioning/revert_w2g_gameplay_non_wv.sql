@@ -7,7 +7,7 @@
 BEGIN;
 -- Backout old partman configs
 DELETE FROM partman.part_config WHERE parent_table = 'public.w2g_gameplay';
-DROP TABLE partman.w2g_gameplay_template;
+DROP TABLE IF EXISTS partman.w2g_gameplay_template;
 
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE w2g_gameplay_fix (LIKE w2g_gameplay_archive INCLUDING ALL);
@@ -35,7 +35,7 @@ ALTER TABLE w2g_gameplay_fix RENAME TO w2g_gameplay;
 
 -- Rename primary/unique constraints on new table
 ALTER TABLE w2g_gameplay RENAME CONSTRAINT w2g_gameplay_fix_pkey TO w2g_gameplay_pkey;
-ALTER TABLE w2g_gameplay RENAME CONSTRAINT w2g_gameplay_fix_tax_status_check TO check_tax_status;
+ALTER TABLE w2g_gameplay RENAME CONSTRAINT w2g_gameplay_archive_tax_status_check TO check_tax_status;
 
 -- Rename indexes on new table
 -- None

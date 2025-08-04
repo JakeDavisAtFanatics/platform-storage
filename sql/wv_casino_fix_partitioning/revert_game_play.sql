@@ -8,7 +8,7 @@ ALTER TABLE game_play_archive DROP CONSTRAINT game_play_wallet_type_id_fkey;
 BEGIN;
 -- Backout old partman configs
 DELETE FROM partman.part_config WHERE parent_table = 'public.game_play';
-DROP TABLE partman.game_play_template;
+DROP TABLE IF EXISTS partman.game_play_template;
 
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE game_play_fix (LIKE game_play_archive INCLUDING ALL);

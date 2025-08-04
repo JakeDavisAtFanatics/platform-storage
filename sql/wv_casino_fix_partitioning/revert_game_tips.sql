@@ -7,7 +7,7 @@
 BEGIN;
 -- Backout old partman configs
 DELETE FROM partman.part_config WHERE parent_table = 'public.game_tips';
-DROP TABLE partman.game_tips_template;
+DROP TABLE IF EXISTS partman.game_tips_template;
 
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE game_tips_fix (LIKE game_tips_archive INCLUDING ALL);

@@ -1,16 +1,21 @@
 -- export $(fbg postgres credentials get --skip-refresh --skip-test --env fbg-dev-1nj fbg-dev-1nj-postgresql)
 -- psql -d bet_fanatics -f sql/wv_casino_fix_partitioning/revert_rgs_game_rounds.sql -v ON_ERROR_STOP=1
 
+-- Drop foreign keys on archive table (outside of trx to avoid errors)
+-- None
+
 BEGIN;
+-- Backout old partman configs
+DELETE FROM partman.part_config WHERE parent_table = 'public.rgs_game_rounds';
+DROP TABLE partman.rgs_game_rounds_template;
 
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE rgs_game_rounds_fix (LIKE rgs_game_rounds_archive INCLUDING ALL);
 
--- Drop foreign keys on archive table
--- None
+-- Rename primary key on archive table
+ALTER TABLE rgs_game_rounds_archive RENAME CONSTRAINT rgs_game_rounds_archive_pkey TO rgs_game_rounds_archive_old_pkey;
 
--- Drop primary/unique constraints on archive table
-ALTER TABLE rgs_game_rounds_archive DROP CONSTRAINT rgs_game_rounds_archive_pkey;
+-- Drop unique constraints on archive table
 ALTER TABLE rgs_game_rounds_archive DROP CONSTRAINT rgs_game_rounds_archive_ext_round_id_rgs_id_key;
 
 -- Drop indexes on archive table
@@ -22,7 +27,7 @@ ALTER TABLE rgs_game_rounds_archive RENAME TO rgs_game_rounds_archive_old;
 -- Populate fix table
 INSERT INTO rgs_game_rounds_fix SELECT * FROM rgs_game_rounds;
 
--- Drop partitioned table, drops all partitions, safe because all data is in archive
+-- Drop partitioned table, drops all partitions
 DROP TABLE rgs_game_rounds;
 
 -- Rename fix table

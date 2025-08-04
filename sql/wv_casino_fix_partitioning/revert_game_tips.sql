@@ -1,15 +1,21 @@
 -- export $(fbg postgres credentials get --skip-refresh --skip-test --env fbg-dev-1nj fbg-dev-1nj-postgresql)
 -- psql -d bet_fanatics -f sql/wv_casino_fix_partitioning/revert_game_tips.sql -v ON_ERROR_STOP=1
 
+-- Drop foreign keys on archive table (outside of trx to avoid errors)
+-- None
+
 BEGIN;
+-- Backout old partman configs
+DELETE FROM partman.part_config WHERE parent_table = 'public.game_tips';
+DROP TABLE partman.game_tips_template;
 
 -- Create fix table, keeps same sequence, creates indexes, and constraints
 CREATE TABLE game_tips_fix (LIKE game_tips_archive INCLUDING ALL);
 
--- Drop foreign keys on archive table
+-- Rename primary key on archive table
 -- None
 
--- Drop primary/unique constraints on archive table
+-- Drop unique constraints on archive table
 -- None
 
 -- Drop indexes on archive table

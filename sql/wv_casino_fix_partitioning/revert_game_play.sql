@@ -1,6 +1,3 @@
--- export $(fbg postgres credentials get --skip-refresh --skip-test --env fbg-dev-1nj fbg-dev-1nj-postgresql)
--- psql -d bet_fanatics -f sql/wv_casino_fix_partitioning/revert_game_play.sql -v ON_ERROR_STOP=1
-
 -- Drop foreign keys on archive table (outside of trx to avoid errors)
 ALTER TABLE game_play_archive DROP CONSTRAINT game_play_fund_type_id_fkey;
 ALTER TABLE game_play_archive DROP CONSTRAINT game_play_wallet_type_id_fkey;

@@ -18,4 +18,4 @@ poetry run python icasino/rgs_game_rounds_partition.py partition-job --stages pr
 poetry run python icasino/game_play_partition.py partition-job --stages prod --targets fbg-prod-1wv
 poetry run python icasino/w2g_gameplay_partition.py partition-job --stages prod --targets fbg-prod-1wv
 ```
-
+By hand, add `w2g_gameplay` back to replication running steps in `sql/wv_casino_fix_partitioning/revert_w2g_gameplay_prod.md`

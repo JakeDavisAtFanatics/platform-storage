@@ -12,9 +12,9 @@ psql -d bet_fanatics -f sql/wv_casino_fix_partitioning/revert_game_play.sql -v O
 3. Once all tables reverted, in `ats-database-scripts`, run partitioning scripts
 ```sh
 # Run in ats-database-scripts
-poetry run python icasino/game_tips_partition.py partition-job --stages prod --targets fbg-prod-1wv
-poetry run python icasino/rgs_game_rounds_partition.py partition-job --stages prod --targets fbg-prod-1wv
+XXpoetry run python icasino/game_tips_partition.py partition-job --stages prod --targets fbg-prod-1wv
+XXxpoetry run python icasino/rgs_game_rounds_partition.py partition-job --stages prod --targets fbg-prod-1wv
 poetry run python icasino/game_play_partition.py partition-job --stages prod --targets fbg-prod-1wv
-poetry run python icasino/w2g_gameplay_partition.py partition-job --stages prod --targets fbg-prod-1wv
+XXpoetry run python icasino/w2g_gameplay_partition.py partition-job --stages prod --targets fbg-prod-1wv
 ```
-4. By hand, add `w2g_gameplay` back to replication running steps in `sql/wv_casino_fix_partitioning/revert_w2g_gameplay_prod.md`
+XX4. By hand, add `w2g_gameplay` back to replication running steps in `sql/wv_casino_fix_partitioning/revert_w2g_gameplay_prod.md`

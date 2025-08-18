@@ -7,7 +7,6 @@ T = TypeVar("T")
 
 class Response(BaseModel, Generic[T]):
     successful: bool
-    request: Optional[str] = None
     data: Optional[T] = None
     message: Optional[str] = None
     error: Optional[Union[Exception, str]] = None
@@ -17,24 +16,21 @@ class Response(BaseModel, Generic[T]):
         return not self.successful
 
     @classmethod
-    def success(cls, data: Optional[T] = None, request: Optional[str] = None) -> "Response[T]":
+    def success(cls, data: Optional[T] = None) -> "Response[T]":
         return cls(
             successful=True,
             data=data,
-            request=request,
         )
 
     @classmethod
     def failure(
         cls,
         message: Optional[str] = None,
-        request: Optional[str] = None,
         error: Optional[Exception] = None,
     ) -> "Response[T]":
         return cls(
             successful=False,
             message=message,
-            request=request,
             error=error,
         )
 

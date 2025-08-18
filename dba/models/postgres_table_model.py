@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class PostgresTable(BaseModel):
     oid: int = 0
     database: str
-    schema_: str  # "schema" is already a BaseModel method
+    schema_: str  # "schema" is already a BaseModel method so we need to append an underscore
     name: str
     safe_to_drop: bool = False
     column_count: int = 0

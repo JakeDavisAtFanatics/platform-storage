@@ -1,10 +1,44 @@
 from psycopg.sql import SQL, Composed, Literal
 
-from postgres_dba.common.data_types import Query
-from postgres_dba.utils.utils import log_sql
+from dba.common.sql import Query
+from dba.models import PostgresTable
 
 
-def select_replication_lag_for_all_slots() -> Query:
+def select_publications_query(table: PostgresTable) -> Query:
+    sql: Composed = SQL("""
+SELECT
+    pubname AS name,
+    NULL AS column,
+    NULL AS column
+FROM pg_catalog.pg_publication p
+     JOIN pg_catalog.pg_publication_namespace pn ON p.oid = pn.pnpubid
+     JOIN pg_catalog.pg_class pc ON pc.relnamespace = pn.pnnspid
+WHERE pc.oid = {} and pg_catalog.pg_relation_is_publishable({})
+UNION
+SELECT pubname
+     , pg_get_expr(pr.prqual, c.oid)
+     , (CASE WHEN pr.prattrs IS NOT NULL THEN
+         (SELECT string_agg(attname, ', ')
+           FROM pg_catalog.generate_series(0, pg_catalog.array_upper(pr.prattrs::pg_catalog.int2[], 1)) s,
+                pg_catalog.pg_attribute
+          WHERE attrelid = pr.prrelid AND attnum = prattrs[s])
+        ELSE NULL END) FROM pg_catalog.pg_publication p
+     JOIN pg_catalog.pg_publication_rel pr ON p.oid = pr.prpubid
+     JOIN pg_catalog.pg_class c ON c.oid = pr.prrelid
+WHERE pr.prrelid = {}
+UNION
+SELECT pubname
+     , NULL
+     , NULL
+FROM pg_catalog.pg_publication p
+WHERE p.puballtables AND pg_catalog.pg_relation_is_publishable({})
+ORDER BY 1;
+""").format(Literal(table.oid), Literal(table.oid), Literal(table.oid), Literal(table.oid))
+
+    return Query(sql)
+
+
+def select_replication_lag_for_all_slots_query() -> Query:
     sql: Composed = SQL("""
 SELECT
     slot_name,
@@ -14,12 +48,10 @@ FROM pg_replication_slots
 ORDER BY lag_size DESC;
 """).format()
 
-    log_sql("select_replication_lag_for_all_slots", sql)
-
     return Query(sql)
 
 
-def select_replication_lag_for_slot(slot_name: str) -> Query:
+def select_replication_lag_for_slot_query(slot_name: str) -> Query:
     sql: Composed = SQL("""
 SELECT
     slot_name,
@@ -29,12 +61,10 @@ FROM pg_replication_slots
 WHERE slot_name = {};
 """).format(Literal(slot_name))
 
-    log_sql("select_replication_lag_for_slot", sql)
-
     return Query(sql)
 
 
-def select_subscription_sync_state_for_all_subscriptions() -> Query:
+def select_subscription_sync_state_for_all_subscriptions_query() -> Query:
     sql: Composed = SQL("""
 SELECT
     s.subname AS subscription_name,
@@ -52,12 +82,10 @@ JOIN pg_subscription s ON s.oid = sr.srsubid
 ORDER BY s.subname, sr.srrelid::regclass::text;
 """).format()
 
-    log_sql("select_subscription_sync_state_for_all_subscriptions", sql)
-
     return Query(sql)
 
 
-def select_subscription_sync_state_for_subscription(subscription: str) -> Query:
+def select_subscription_sync_state_for_subscription_query(subscription: str) -> Query:
     sql: Composed = SQL("""
 SELECT
     s.subname AS subscription_name,
@@ -75,7 +103,5 @@ JOIN pg_subscription s ON s.oid = sr.srsubid
 WHERE s.subname = {}
 ORDER BY s.subname, sr.srrelid::regclass::text;
 """).format(Literal(subscription))
-
-    log_sql("select_subscription_sync_state_for_subscription", sql)
 
     return Query(sql)

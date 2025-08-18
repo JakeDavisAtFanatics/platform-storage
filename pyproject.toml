@@ -1,7 +1,7 @@
 [project]
 dependencies = []
 description = "Postgres DBA stuff"
-name = "postgres-dba"
+name = "dba"
 requires-python = "~=3.13, <4"
 version = "0.1.0"
 
@@ -14,14 +14,14 @@ dev = [
 ]
 
 [project.scripts]
-dba = "postgres_dba.dba:app"
+dba = "dba.dba:app"
 
 [build-system]
 build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["postgres_dba"]
+packages = ["dba"]
 
 [tool.uv]
 default-groups = ["dev"]

@@ -1,11 +1,10 @@
 from psycopg.sql import SQL, Composed, Literal
 
-from postgres_dba.common.data_types import Query
-from postgres_dba.models.postgres_table_model import PostgresTable
-from postgres_dba.utils.utils import log_sql
+from dba.common.sql import Query
+from dba.models import PostgresTable
 
 
-def select_check_constraints_sql(table: PostgresTable) -> Query:
+def select_check_constraints_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
      r.conname AS name,
@@ -19,22 +18,18 @@ ORDER BY
      1;
 """).format(Literal(table.oid))
 
-    log_sql("select_foreign_keys_sql", sql)
-
     return Query(sql)
 
 
-def select_column_count_sql(table: PostgresTable) -> Query:
+def select_column_count_query(table: PostgresTable) -> Query:
     sql: Composed = SQL(
         "SELECT COUNT(1) FROM information_schema.columns WHERE table_schema = {} AND table_name = {};"
     ).format(Literal(table.schema_), Literal(table.name))
 
-    log_sql("select_column_count_sql", sql)
-
     return Query(sql)
 
 
-def select_column_definition_sql(table: PostgresTable) -> Query:
+def select_column_definition_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""                 
 SELECT
     a.attname AS COLUMN,
@@ -74,12 +69,10 @@ ORDER BY
      a.attnum;
 """).format(Literal(table.oid))
 
-    log_sql("select_column_definition_sql", sql)
-
     return Query(sql)
 
 
-def select_foreign_keys_sql(table: PostgresTable) -> Query:
+def select_foreign_keys_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
      conname AS name,
@@ -94,12 +87,10 @@ ORDER BY
      conname;
 """).format(Literal(table.oid))
 
-    log_sql("select_foreign_keys_sql", sql)
-
     return Query(sql)
 
 
-def select_indexes_sql(table: PostgresTable) -> Query:
+def select_indexes_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
      c2.relname AS name,
@@ -131,48 +122,10 @@ ORDER BY
      columns;
 """).format(Literal(table.oid))
 
-    log_sql("select_indexes_sql", sql)
-
     return Query(sql)
 
 
-def select_publications_sql(table: PostgresTable) -> Query:
-    sql: Composed = SQL("""
-SELECT
-    pubname AS name,
-    NULL AS column,
-    NULL AS column
-FROM pg_catalog.pg_publication p
-     JOIN pg_catalog.pg_publication_namespace pn ON p.oid = pn.pnpubid
-     JOIN pg_catalog.pg_class pc ON pc.relnamespace = pn.pnnspid
-WHERE pc.oid = {} and pg_catalog.pg_relation_is_publishable({})
-UNION
-SELECT pubname
-     , pg_get_expr(pr.prqual, c.oid)
-     , (CASE WHEN pr.prattrs IS NOT NULL THEN
-         (SELECT string_agg(attname, ', ')
-           FROM pg_catalog.generate_series(0, pg_catalog.array_upper(pr.prattrs::pg_catalog.int2[], 1)) s,
-                pg_catalog.pg_attribute
-          WHERE attrelid = pr.prrelid AND attnum = prattrs[s])
-        ELSE NULL END) FROM pg_catalog.pg_publication p
-     JOIN pg_catalog.pg_publication_rel pr ON p.oid = pr.prpubid
-     JOIN pg_catalog.pg_class c ON c.oid = pr.prrelid
-WHERE pr.prrelid = {}
-UNION
-SELECT pubname
-     , NULL
-     , NULL
-FROM pg_catalog.pg_publication p
-WHERE p.puballtables AND pg_catalog.pg_relation_is_publishable({})
-ORDER BY 1;
-""").format(Literal(table.oid), Literal(table.oid), Literal(table.oid), Literal(table.oid))
-
-    log_sql("select_publications_sql", sql)
-
-    return Query(sql)
-
-
-def select_referenced_by_foreign_keys_sql(table: PostgresTable) -> Query:
+def select_referenced_by_foreign_keys_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
      conrelid::pg_catalog.regclass AS table,
@@ -192,12 +145,10 @@ WHERE
 ORDER BY 1;
 """).format(Literal(table.oid))
 
-    log_sql("select_referenced_by_foreign_keys_sql", sql)
-
     return Query(sql)
 
 
-def select_table_oid_sql(table: PostgresTable) -> Query:
+def select_table_oid_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
     c.oid
@@ -210,12 +161,10 @@ WHERE
     AND pg_catalog.pg_table_is_visible(c.oid);
 """).format(Literal(f"^({table.name})$"), Literal(f"^({table.schema_})$"))
 
-    log_sql("select_table_oid_sql", sql)
-
     return Query(sql)
 
 
-def select_table_stats_sql(table: PostgresTable) -> Query:
+def select_table_stats_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
      reltuples::BIGINT AS row_estimate,
@@ -228,12 +177,10 @@ WHERE
      c.oid = {};
 """).format(Literal(table.oid))
 
-    log_sql("select_table_stats_sql", sql)
-
     return Query(sql)
 
 
-def select_triggers_sql(table: PostgresTable) -> Query:
+def select_triggers_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("""
 SELECT
      t.tgname AS name,
@@ -256,7 +203,5 @@ WHERE
 ORDER BY
      1;
 """).format(Literal(table.oid))
-
-    log_sql("select_triggers_sql", sql)
 
     return Query(sql)

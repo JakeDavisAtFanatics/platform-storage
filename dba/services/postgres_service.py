@@ -7,9 +7,10 @@ import psycopg
 from psycopg import Cursor
 from psycopg.rows import TupleRow
 
-from dba.common.sql import Query
-from dba.models import Response, Row
-from dba.utils import exit_on_error, print_table_from_rows
+from dba.common.data_types.query import Query
+from dba.models.response_model import Response
+from dba.models.row_model import Row
+from dba.utils.utils import exit_on_error, print_table_from_rows
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +21,13 @@ class PostgresService:
 
     @contextmanager
     def get_cursor(self, name: str | None = None, autocommit: bool = False) -> Iterator[Cursor]:
+        cursor_name: str = name if name else "Client-side"
         with psycopg.connect(self._conn_info, autocommit=autocommit) as conn:
             cursor_factory = conn.cursor(name=name) if name else conn.cursor()
             with cursor_factory as cur:
+                logger.debug(f"{cursor_name} cursor opened (autocommit={autocommit}).")
                 yield cur
+                logger.debug(f"{cursor_name} cursor closed.")
 
     def query(self, query: Query) -> "_QueryExecutioner":
         return _QueryExecutioner(self._conn_info, query)

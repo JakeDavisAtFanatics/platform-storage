@@ -1,7 +1,7 @@
 from psycopg.sql import SQL, Composed, Literal
 
-from dba.common.sql import Query
-from dba.models import PostgresTable
+from dba.common.data_types.query import Query
+from dba.models.postgres_table_model import PostgresTable
 
 
 def select_check_constraints_query(table: PostgresTable) -> Query:
@@ -121,6 +121,20 @@ ORDER BY
      i.indisprimary DESC,
      columns;
 """).format(Literal(table.oid))
+
+    return Query(sql)
+
+
+def select_primary_key_name_query(table: PostgresTable) -> Query:
+    sql: Composed = SQL("""
+SELECT
+    conname
+FROM
+    pg_constraint
+WHERE
+    conrelid = {}::regclass
+    AND contype = 'p';
+""").format(Literal(table.fqn))
 
     return Query(sql)
 

@@ -3,9 +3,10 @@ from typing import Annotated
 
 import typer
 
-from dba.common.sql import Query, select_replication_lag_for_all_slots_query, select_replication_lag_for_slot_query
-from dba.services import PostgresService
-from dba.utils import goodbye, pg_conn_string_from_env_vars
+from dba.common.data_types.query import Query
+from dba.common.sql.replication import select_replication_lag_for_all_slots_query, select_replication_lag_for_slot_query
+from dba.services.postgres_service import PostgresService
+from dba.utils.utils import goodbye, pg_conn_string_from_env_vars
 
 app = typer.Typer(invoke_without_command=True)
 logger = logging.getLogger(__name__)

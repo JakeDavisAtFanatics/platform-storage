@@ -3,17 +3,15 @@ from typing import Annotated
 
 import typer
 
-from dba.common.sql import (
-    Query,
-    create_table_like_query,
-    drop_table_if_exists_query,
-    insert_into_query,
-    select_all_query,
-    select_column_count_query,
-)
-from dba.models import PostgresTable, Response, Row
-from dba.services import PostgresService
-from dba.utils import cleanup_and_exit, goodbye, pg_conn_string_from_env_vars
+from dba.common.data_types.query import Query
+from dba.common.sql.crud import insert_into_query, select_all_query
+from dba.common.sql.ddl import create_table_like_query, drop_table_if_exists_query
+from dba.common.sql.table_info import select_column_count_query
+from dba.models.postgres_table_model import PostgresTable
+from dba.models.response_model import Response
+from dba.models.row_model import Row
+from dba.services.postgres_service import PostgresService
+from dba.utils.utils import cleanup_and_exit, goodbye, pg_conn_string_from_env_vars
 
 app = typer.Typer(invoke_without_command=True)
 logger = logging.getLogger(__name__)

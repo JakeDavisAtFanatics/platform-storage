@@ -1,7 +1,7 @@
 from psycopg.sql import SQL, Composed, Identifier
 
-from dba.common.sql import Query
-from dba.models import PostgresTable
+from dba.common.data_types.query import Query
+from dba.models.postgres_table_model import PostgresTable
 
 
 def insert_into_query(table: PostgresTable) -> Query:

@@ -7,9 +7,10 @@ version = "0.1.0"
 
 [dependency-groups]
 dev = [
-    "psycopg[binary]>=3.2.9,<4",
+    "psycopg[binary]>=3.2.9,<4.0",
     "pydantic>=2.11.7,<3.0",
-    "ruff>=0.12.4,<1",
+    "pyyaml>=6.0.2,<7.0",
+    "ruff>=0.12.4,<1.0",
     "typer>=0.16.0,<1.0",
 ]
 
@@ -25,6 +26,9 @@ packages = ["dba"]
 
 [tool.uv]
 default-groups = ["dev"]
+
+[tool.uv.sources]
+platform-common = { git = "ssh://git@github.com/fanatics-gaming/platform-common", branch = "main" }
 
 [tool.ruff]
 line-length = 120

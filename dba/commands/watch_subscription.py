@@ -3,13 +3,13 @@ from typing import Annotated
 
 import typer
 
-from dba.common.sql import (
-    Query,
+from dba.common.data_types.query import Query
+from dba.common.sql.replication import (
     select_subscription_sync_state_for_all_subscriptions_query,
     select_subscription_sync_state_for_subscription_query,
 )
-from dba.services import PostgresService
-from dba.utils import goodbye, pg_conn_string_from_env_vars
+from dba.services.postgres_service import PostgresService
+from dba.utils.utils import goodbye, pg_conn_string_from_env_vars
 
 app = typer.Typer(invoke_without_command=True)
 logger = logging.getLogger(__name__)

@@ -9,7 +9,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from dba.models import Response, Row
+from dba.models.response_model import Response
+from dba.models.row_model import Row
+
+
 
 logger = logging.getLogger(__name__)
 

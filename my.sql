@@ -1,0 +1,1 @@
+SELECT conname FROM pg_constraint WHERE conrelid = 'jdavis_archive'::regclass AND contype = 'p';

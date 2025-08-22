@@ -4,22 +4,24 @@ from typing import Annotated
 
 import typer
 
-from dba.common.sql import (
-    Query,
+from dba.common.data_types.query import Query
+from dba.common.sql.replication import select_publications_query
+from dba.common.sql.table_info import (
     select_check_constraints_query,
     select_column_count_query,
     select_column_definition_query,
     select_foreign_keys_query,
     select_indexes_query,
-    select_publications_query,
     select_referenced_by_foreign_keys_query,
     select_table_oid_query,
     select_table_stats_query,
     select_triggers_query,
 )
-from dba.models import PostgresTable, Response, Row
-from dba.services import Cursor, PostgresService
-from dba.utils import cleanup_and_exit, goodbye, pg_conn_string_from_env_vars, print_table_from_rows
+from dba.models.postgres_table_model import PostgresTable
+from dba.models.response_model import Response
+from dba.models.row_model import Row
+from dba.services.postgres_service import Cursor, PostgresService
+from dba.utils.utils import cleanup_and_exit, goodbye, pg_conn_string_from_env_vars, print_table_from_rows
 
 app = typer.Typer(invoke_without_command=True)
 logger = logging.getLogger(__name__)

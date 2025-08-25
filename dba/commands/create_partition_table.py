@@ -4,7 +4,7 @@ from typing import Annotated, Any, Dict
 import typer
 
 from dba.common.data_types.query import Query
-from dba.common.sql.ddl import create_table_like_query, drop_primary_key_query, rename_table_query
+from dba.common.sql.ddl import drop_primary_key_query, rename_table_query
 from dba.common.sql.partition import (
     create_table_like_including_all_partition_by_range_query,
     partman_create_parent_query,
@@ -25,46 +25,33 @@ logger = logging.getLogger(__name__)
 
 @app.callback()
 def main(
-    database_option: Annotated[str, typer.Option("--database", "-d", help="Name of database.")],
-    table_option: Annotated[str, typer.Option("--table", "-t", help="Name of table.")],
-    schema_option: Annotated[str, typer.Option("--schema", "-s", help="Name of schema.")] = "public",
-    batch_size_option: Annotated[
-        int, typer.Option("--batch-size", "-b", help="Maximum number of rows to insert per batch.")
-    ] = 2500,
+    config_option: Annotated[str, typer.Option("--config", "-c", help="Yaml config to process.")],
     debug_option: Annotated[bool, typer.Option("--debug", help="Print excessive messages.")] = False,
 ):
     if debug_option:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    # TODO use yaml service in fbg-storage-automation
-    yaml: YamlService = YamlService("jdavis.yaml")
-    partman_dict: Response[Dict[str, Any]] = yaml.get("partman", "jdavis")
+    yaml: YamlService = YamlService(config_option)
+    partman_dict: Response[Dict[str, Any]] = yaml.get()
     partman_config: PartmanConfig = PartmanConfig.model_validate(partman_dict)
-
-    conn_info: str = pg_conn_string_from_env_vars(database_option)
+    conn_info: str = pg_conn_string_from_env_vars(partman_config.database)
     pg: PostgresService = PostgresService(conn_info)
     source_table: PostgresTable = PostgresTable(
-        database=database_option,
-        schema_=schema_option,
-        name=table_option,
+        database=partman_config.database,
+        schema_=partman_config.schema_,
+        name=partman_config.table,
     )
     archive_table: PostgresTable = PostgresTable(
-        database=database_option,
-        schema_=schema_option,
+        database=source_table.database,
+        schema_=source_table.schema_,
         name=f"{source_table.name}_archive",
     )
     parent_table: PostgresTable = PostgresTable(
-        database=database_option,
-        schema_=schema_option,
-        name=f"{source_table.name}",
+        database=source_table.database,
+        schema_=source_table.schema_,
+        name=source_table.name,
         safe_to_drop=True,
         partman_config=partman_config,
-    )
-    template_table: PostgresTable = PostgresTable(
-        database=database_option,
-        schema_="partman",
-        name=f"{parent_table.name}_template",
-        safe_to_drop=True,
     )
 
     with pg.get_cursor() as cur:
@@ -73,8 +60,7 @@ def main(
         archive_table.update_primary_key_name(primary_key_name)
         _drop_primary_key_from_archive_table(pg, cur, archive_table)
         _create_parent_table(pg, cur, parent_table, archive_table)
-        _create_template_table(pg, cur, parent_table, template_table)
-        _create_partman_config(pg, cur, parent_table, template_table)
+        _create_partman_config(pg, cur, parent_table)
         _update_partman_retention(pg, cur, parent_table)
     goodbye()
 
@@ -129,23 +115,12 @@ def _create_parent_table(
     pg.query(query).execute_or_exit(cur)
 
 
-def _create_template_table(
-    pg: PostgresService,
-    cur: Cursor,
-    parent_table: PostgresTable,
-    template_table: PostgresTable,
-) -> None:
-    query: Query = create_table_like_query(parent_table, template_table)
-    pg.query(query).execute_or_exit(cur)
-
-
 def _create_partman_config(
     pg: PostgresService,
     cur: Cursor,
     parent_table: PostgresTable,
-    template_table: PostgresTable,
 ) -> None:
-    query: Query = partman_create_parent_query(parent_table, template_table)
+    query: Query = partman_create_parent_query(parent_table)
     pg.query(query).execute_or_exit(cur)
 
 

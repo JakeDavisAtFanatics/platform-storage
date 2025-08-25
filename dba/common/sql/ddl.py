@@ -33,6 +33,14 @@ def drop_table_if_exists_query(table: PostgresTable) -> Query:
 
     return Query(sql)
 
+def lock_table(table: PostgresTable) -> Query:
+    sql: Composed = SQL("ALTER TABLE {}.{} DROP CONSTRAINT {};").format(
+        Identifier(table.schema_),
+        Identifier(table.name),
+        Identifier(table.primary_key_name),
+    )
+
+    return Query(sql)
 
 def rename_table_query(source_table: PostgresTable, target_table: PostgresTable) -> Query:
     sql: Composed = SQL("ALTER TABLE {}.{} RENAME TO {};").format(

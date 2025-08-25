@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field
 
 
 class PartmanConfig(BaseModel):
+    database: str = Field(..., description="The database.")
+    schema_: str = Field(..., description="The schema.")
+    table: str = Field(..., description="The table.")
     primary_key: list[str] = Field(..., description="The new Primary Key which includes the partition column.")
     control: str = Field(..., description="The column to partition on.")
     partition_interval: str = Field(..., description="Partitioning interval (ex: '1 mon').")

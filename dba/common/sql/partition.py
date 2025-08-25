@@ -35,7 +35,7 @@ PARTITION BY
     return Query(sql)
 
 
-def partman_create_parent_query(parent_table: PostgresTable, template_table: PostgresTable) -> Query:
+def partman_create_parent_query(parent_table: PostgresTable) -> Query:
     if parent_table.partman_config is None:
         raise ValueError(f"Table {parent_table.name} has no PartmanConfig set.")
 
@@ -48,8 +48,7 @@ SELECT partman.create_parent(
     p_interval := {},
     p_type := {},
     p_premake := {},
-    p_start_partition := {},
-    p_template_table := {});
+    p_start_partition := {});
 """).format(
         Literal(parent_table.fqn),
         Literal(parent_table.partman_config.control),
@@ -57,7 +56,7 @@ SELECT partman.create_parent(
         Literal(parent_table.partman_config.partition_type),
         Literal(parent_table.partman_config.premake),
         SQL(start_partition),
-        Literal(template_table.fqn),
+        # Literal(template_table.fqn),
     )
 
     return Query(sql)
@@ -73,6 +72,30 @@ def partman_update_retention_query(table: PostgresTable) -> Query:
         Literal(table.partman_config.retention),
         Literal(table.partman_config.retention_keep_table),
         Literal(table.fqn),
+    )
+
+    return Query(sql)
+
+
+def select_all_from_1st_of_month_query(table: PostgresTable, column: str, retention: str) -> Query:
+    ts: LiteralString = cast(LiteralString, f"date_trunc('month', CURRENT_TIMESTAMP - INTERVAL '{retention}')")
+    sql: Composed = SQL("SELECT * FROM {}.{} WHERE {} >= {}; ").format(
+        Identifier(table.schema_), Identifier(table.name), Identifier(column), SQL(ts)
+    )
+
+    return Query(sql)
+
+
+def select_column_from_1st_of_month_query(
+    table: PostgresTable, select_column: str, where_column: str, retention: str
+) -> Query:
+    ts: LiteralString = cast(LiteralString, f"date_trunc('month', CURRENT_TIMESTAMP - INTERVAL '{retention}')")
+    sql: Composed = SQL("SELECT {} FROM {}.{} WHERE {} >= {}; ").format(
+        Identifier(select_column),
+        Identifier(table.schema_),
+        Identifier(table.name),
+        Identifier(where_column),
+        SQL(ts),
     )
 
     return Query(sql)

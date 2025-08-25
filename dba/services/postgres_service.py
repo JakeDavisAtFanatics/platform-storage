@@ -113,4 +113,13 @@ class _QueryExecutioner:
     def _log_query(self, sql: Query) -> None:
         from textwrap import dedent
 
-        logger.debug(dedent(sql.as_string()))
+        sql_str = dedent(sql.as_string())
+        max_start = 500
+        max_end = 50
+
+        if len(sql_str) > (max_start + max_end):
+            truncated = f"{sql_str[:max_start]}...{sql_str[-max_end:]}"
+        else:
+            truncated = sql_str
+
+        logger.debug(truncated)

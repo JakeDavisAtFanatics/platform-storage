@@ -1,0 +1,11 @@
+database: "bet_fanatics"
+schema_: "public"
+table: "w2g_gameplay"
+primary_key: ["id", "settlement_time"]
+control: "settlement_time"
+partition_interval: "1 month"
+partition_type: "range"
+premake: 3
+retention: "2 months"
+retention_keep_table: True
+start_partition: "to_char(date_trunc('month', CURRENT_TIMESTAMP - '2 months'::interval), 'YYYY-MM-DD HH24:MI:SS')"

@@ -4,7 +4,7 @@ from typing import Annotated, Any, Dict
 import typer
 
 from dba.common.data_types.query import Query
-from dba.common.sql.ddl import drop_primary_key_query, rename_table_query
+from dba.common.sql.ddl import drop_constraint_query, drop_primary_key_query, rename_table_query
 from dba.common.sql.partition import (
     create_table_like_including_all_partition_by_range_query,
     partman_create_parent_query,
@@ -17,7 +17,7 @@ from dba.models.response_model import Response
 from dba.models.row_model import Row
 from dba.services.postgres_service import Cursor, PostgresService
 from dba.services.yaml_service import YamlService
-from dba.utils.utils import cleanup_and_exit, goodbye, pg_conn_string_from_env_vars
+from dba.utils.utils import goodbye, pg_conn_string_from_env_vars
 
 app = typer.Typer(invoke_without_command=True)
 logger = logging.getLogger(__name__)
@@ -56,9 +56,17 @@ def main(
 
     with pg.get_cursor() as cur:
         _rename_source_table_to_archive_table(pg, cur, source_table, archive_table)
-        primary_key_name: str = _get_primary_key_name_from_archive_table(pg, cur, archive_table)
-        archive_table.update_primary_key_name(primary_key_name)
-        _drop_primary_key_from_archive_table(pg, cur, archive_table)
+        primary_key_name: str | None = _get_primary_key_name_from_archive_table(pg, cur, archive_table)
+        if primary_key_name:
+            archive_table.update_primary_key_name(primary_key_name)
+            _drop_primary_key_from_archive_table(pg, cur, archive_table)
+        # hardcoded sadness
+        # drop unique index on rgs_game_rounds
+        if parent_table.name == "rgs_game_rounds":
+            _drop_constraint_from_archive_table(pg, cur, archive_table, "rgs_game_rounds_ext_round_id_rgs_id_key")
+        # drop unique index on game_play
+        if parent_table.name == "game_play":
+            _drop_constraint_from_archive_table(pg, cur, archive_table, "id_pkey")
         _create_parent_table(pg, cur, parent_table, archive_table)
         _create_partman_config(pg, cur, parent_table)
         _update_partman_retention(pg, cur, parent_table)
@@ -79,19 +87,16 @@ def _get_primary_key_name_from_archive_table(
     pg: PostgresService,
     cur: Cursor,
     archive_table: PostgresTable,
-) -> str:
+) -> str | None:
     query: Query = select_primary_key_name_query(archive_table)
     pg.query(query).execute_or_exit(cur)
     response: Response[Row] = pg.query(query).fetch_one_or_exit(cur)
 
-    primary_key_name: str = ""
+    primary_key_name: str | None = None
 
     if response.data:
-        primary_key_name = next(iter(response.data.values()))
-
-    if not primary_key_name:
-        error_message: str = f"Primary Key name for {archive_table.name} is empty."
-        cleanup_and_exit(error_message)
+        if response.data.values():
+            primary_key_name = next(iter(response.data.values()))
 
     return primary_key_name
 
@@ -102,6 +107,17 @@ def _drop_primary_key_from_archive_table(
     archive_table: PostgresTable,
 ) -> None:
     query: Query = drop_primary_key_query(archive_table)
+    pg.query(query).execute_or_exit(cur)
+
+
+# hardcoded sadness
+def _drop_constraint_from_archive_table(
+    pg: PostgresService,
+    cur: Cursor,
+    archive_table: PostgresTable,
+    constraint_name: str,
+) -> None:
+    query: Query = drop_constraint_query(archive_table, constraint_name)
     pg.query(query).execute_or_exit(cur)
 
 

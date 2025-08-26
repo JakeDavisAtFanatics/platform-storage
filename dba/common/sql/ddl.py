@@ -14,6 +14,15 @@ def create_table_like_query(source_table: PostgresTable, target_table: PostgresT
 
     return Query(sql)
 
+# hardcoded sadness
+def drop_constraint_query(table: PostgresTable, constraint_name: str) -> Query:
+    sql: Composed = SQL("ALTER TABLE {}.{} DROP CONSTRAINT {};").format(
+        Identifier(table.schema_),
+        Identifier(table.name),
+        Identifier(constraint_name),
+    )
+
+    return Query(sql)
 
 def drop_primary_key_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("ALTER TABLE {}.{} DROP CONSTRAINT {};").format(

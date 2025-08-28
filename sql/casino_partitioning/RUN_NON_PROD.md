@@ -48,12 +48,14 @@ psql -q -d bet_fanatics -f sql/casino_partitioning/game_play/6_privs.sql -v ON_E
 
 5. w2g_gameplay
 ```sh
+# TODO handle replication
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/1_pre_counts.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/2_partition.sql -v ON_ERROR_STOP=1
 bash sql/casino_partitioning/move_batch.sh w2g_gameplay settlement_time 100000
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/4_post_counts.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/5_indexes.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/6_privs.sql -v ON_ERROR_STOP=1
+# TODO handle replication
 ```
 
 6. drop move_batch function

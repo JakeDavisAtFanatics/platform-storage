@@ -14,6 +14,19 @@ def create_table_like_query(source_table: PostgresTable, target_table: PostgresT
 
     return Query(sql)
 
+
+# hardcoded sadness
+def create_index_query(table: PostgresTable, index_name: str, column: str) -> Query:
+    sql: Composed = SQL("CREATE INDEX {} ON {}.{} ({});").format(
+        Identifier(index_name),
+        Identifier(table.schema_),
+        Identifier(table.name),
+        Identifier(column),
+    )
+
+    return Query(sql)
+
+
 # hardcoded sadness
 def drop_constraint_query(table: PostgresTable, constraint_name: str) -> Query:
     sql: Composed = SQL("ALTER TABLE {}.{} DROP CONSTRAINT {};").format(
@@ -23,6 +36,7 @@ def drop_constraint_query(table: PostgresTable, constraint_name: str) -> Query:
     )
 
     return Query(sql)
+
 
 def drop_primary_key_query(table: PostgresTable) -> Query:
     sql: Composed = SQL("ALTER TABLE {}.{} DROP CONSTRAINT {};").format(
@@ -42,6 +56,7 @@ def drop_table_if_exists_query(table: PostgresTable) -> Query:
 
     return Query(sql)
 
+
 def lock_table(table: PostgresTable) -> Query:
     sql: Composed = SQL("ALTER TABLE {}.{} DROP CONSTRAINT {};").format(
         Identifier(table.schema_),
@@ -50,6 +65,7 @@ def lock_table(table: PostgresTable) -> Query:
     )
 
     return Query(sql)
+
 
 def rename_table_query(source_table: PostgresTable, target_table: PostgresTable) -> Query:
     sql: Composed = SQL("ALTER TABLE {}.{} RENAME TO {};").format(

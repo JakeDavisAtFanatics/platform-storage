@@ -1,0 +1,1 @@
+DROP FUNCTION move_batch(text, text, int);

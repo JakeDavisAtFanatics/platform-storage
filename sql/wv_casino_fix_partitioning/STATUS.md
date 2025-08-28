@@ -1,7 +1,3 @@
-TODO AFTER LOAD TESTING
-fbg-inf-dev-1nj
-fbg-inf-dev-1tn
-
 DONE
 fbg-dev-1c
 fbg-dev-1nj
@@ -14,10 +10,14 @@ fbg-cert-1pa
 fbg-cert-1nj
 fbg-cert-1mi
 
-PROD TODO
+DONE (using new scripts)
+fbg-inf-dev-1nj
+fbg-inf-dev-1tn
+
+PROD DONE
 fbg-prod-1wv
 
-PROD NOT NEEDED
+PROD NOT NEEDED (will be done with new scripts)
 fbg-prod-1mi
 fbg-prod-1nj
 fbg-prod-1pa

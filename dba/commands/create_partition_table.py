@@ -4,7 +4,7 @@ from typing import Annotated, Any, Dict
 import typer
 
 from dba.common.data_types.query import Query
-from dba.common.sql.ddl import drop_constraint_query, drop_primary_key_query, rename_table_query
+from dba.common.sql.ddl import create_index_query, drop_constraint_query, drop_primary_key_query, rename_table_query
 from dba.common.sql.partition import (
     create_table_like_including_all_partition_by_range_query,
     partman_create_parent_query,
@@ -68,8 +68,19 @@ def main(
         if parent_table.name == "game_play":
             _drop_constraint_from_archive_table(pg, cur, archive_table, "id_pkey")
         _create_parent_table(pg, cur, parent_table, archive_table)
+        # hardcoded sadness
+        # add indexes on control columns
+        if parent_table.name == "game_tips":
+            _add_index_to_parent_table(pg, cur, parent_table, "game_tips_created_idx", "created")
+        elif parent_table.name == "rgs_game_rounds":
+            _add_index_to_parent_table(pg, cur, parent_table, "rgs_game_rounds_round_date_idx", "round_date")
+        elif parent_table.name == "game_play":
+            _add_index_to_parent_table(pg, cur, parent_table, "game_play_placed_time_idx", "placed_time")
+        elif parent_table.name == "w2g_gameplay":
+            _add_index_to_parent_table(pg, cur, parent_table, "w2g_gameplay_settlement_time_idx", "settlement_time")
         _create_partman_config(pg, cur, parent_table)
         _update_partman_retention(pg, cur, parent_table)
+
     goodbye()
 
 
@@ -107,6 +118,14 @@ def _drop_primary_key_from_archive_table(
     archive_table: PostgresTable,
 ) -> None:
     query: Query = drop_primary_key_query(archive_table)
+    pg.query(query).execute_or_exit(cur)
+
+
+# hardcoded sadness
+def _add_index_to_parent_table(
+    pg: PostgresService, cur: Cursor, parent_table: PostgresTable, index_name: str, column: str
+) -> None:
+    query: Query = create_index_query(parent_table, index_name, column)
     pg.query(query).execute_or_exit(cur)
 
 

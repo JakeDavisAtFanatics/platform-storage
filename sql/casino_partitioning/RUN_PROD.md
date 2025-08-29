@@ -8,6 +8,7 @@ psql -d bet_fanatics -f sql/casino_partitioning/move_batch_create.sql -v ON_ERRO
 
 2. game_tips
 ```sh
+tail -F sql/casino_partitioning/game_tips/game_tips.log
 psql -q -d bet_fanatics -f sql/casino_partitioning/game_tips/1_pre_counts.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/game_tips/2_partition.sql -v ON_ERROR_STOP=1
 bash sql/casino_partitioning/move_batch.sh game_tips created 100000
@@ -18,6 +19,7 @@ psql -q -d bet_fanatics -f sql/casino_partitioning/game_tips/6_privs.sql -v ON_E
 
 3. rgs_game_rounds
 ```sh
+tail -F sql/casino_partitioning/rgs_game_rounds/rgs_game_rounds.log
 psql -q -d bet_fanatics -f sql/casino_partitioning/rgs_game_rounds/1_pre_counts.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/rgs_game_rounds/2_partition.sql -v ON_ERROR_STOP=1
 bash sql/casino_partitioning/move_batch.sh rgs_game_rounds round_date 100000
@@ -28,6 +30,7 @@ psql -q -d bet_fanatics -f sql/casino_partitioning/rgs_game_rounds/6_privs.sql -
 
 4. game_play
 ```sh
+tail -F sql/casino_partitioning/game_play/game_play.log
 psql -q -d bet_fanatics -f sql/casino_partitioning/game_play/1_pre_counts.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/game_play/2_partition.sql -v ON_ERROR_STOP=1
 bash sql/casino_partitioning/move_batch.sh game_play placed_time 100000
@@ -39,6 +42,7 @@ psql -q -d bet_fanatics -f sql/casino_partitioning/game_play/6_privs.sql -v ON_E
 5. w2g_gameplay
 ```sh
 # TODO handle replication
+tail -F sql/casino_partitioning/w2g_gameplay/w2g_gameplay.log
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/1_pre_counts.sql -v ON_ERROR_STOP=1
 psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/2_partition.sql -v ON_ERROR_STOP=1
 bash sql/casino_partitioning/move_batch.sh w2g_gameplay settlement_time 100000
@@ -51,5 +55,4 @@ psql -q -d bet_fanatics -f sql/casino_partitioning/w2g_gameplay/6_privs.sql -v O
 6. drop move_batch function
 ```sh
 psql -q -d bet_fanatics -f sql/casino_partitioning/move_batch_drop.sql -v ON_ERROR_STOP=1
-drop rgs_game_rounds_jdavis?
 ```
